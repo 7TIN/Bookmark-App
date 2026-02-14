@@ -3,7 +3,7 @@ import { GoogleSignInButton } from '@/components/google-sign-in-button'
 import { SignOutButton } from '@/components/sign-out-button'
 import { prisma } from '@/lib/prisma'
 import { syncProfileFromAuthUser } from '@/lib/server/profile'
-import { createClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient } from '@/lib/supabase/ssr-server'
 
 type Bookmark = {
   id: string
@@ -14,7 +14,7 @@ type Bookmark = {
 }
 
 export default async function Home() {
-  const supabase = await createClient()
+  const supabase = await createServerSupabaseClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

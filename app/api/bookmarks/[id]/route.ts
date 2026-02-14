@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { createClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient } from '@/lib/supabase/ssr-server'
 import { NextResponse } from 'next/server'
 
 export async function DELETE(
@@ -11,7 +11,7 @@ export async function DELETE(
     return NextResponse.json({ error: 'Bookmark id is required.' }, { status: 400 })
   }
 
-  const supabase = await createClient()
+  const supabase = await createServerSupabaseClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

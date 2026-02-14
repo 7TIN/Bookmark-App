@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "prisma:generate": "prisma generate",
+    "prisma:pull": "prisma db pull"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.0",

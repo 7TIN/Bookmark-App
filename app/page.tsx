@@ -1,6 +1,8 @@
 import { BookmarksDashboard } from '@/components/bookmarks-dashboard'
 import { GoogleSignInButton } from '@/components/google-sign-in-button'
 import { SignOutButton } from '@/components/sign-out-button'
+import { prisma } from '@/lib/prisma'
+import { syncProfileFromAuthUser } from '@/lib/server/profile'
 import { createClient } from '@/lib/supabase/server'
 
 type Bookmark = {
@@ -21,15 +23,23 @@ export default async function Home() {
   let bookmarksError: string | null = null
 
   if (user) {
-    const { data, error } = await supabase
-      .from('bookmarks')
-      .select('id, user_id, title, url, created_at')
-      .order('created_at', { ascending: false })
+    try {
+      await syncProfileFromAuthUser(user)
 
-    if (error) {
-      bookmarksError = error.message
-    } else {
-      bookmarks = (data as Bookmark[]) ?? []
+      const bookmarkRows = await prisma.bookmark.findMany({
+        where: { userId: user.id },
+        orderBy: { createdAt: 'desc' },
+      })
+
+      bookmarks = bookmarkRows.map((bookmark) => ({
+        id: bookmark.id,
+        user_id: bookmark.userId,
+        title: bookmark.title,
+        url: bookmark.url,
+        created_at: bookmark.createdAt.toISOString(),
+      }))
+    } catch {
+      bookmarksError = 'Failed to load bookmarks.'
     }
   }
 

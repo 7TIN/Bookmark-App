@@ -131,24 +131,29 @@ export function BookmarksDashboard({
 
     setIsSubmitting(true)
 
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from('bookmarks')
-      .insert({
-        user_id: userId,
+    const response = await fetch('/api/bookmarks', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
         title: title.trim(),
         url: normalizedUrl,
-      })
-      .select('id, user_id, title, url, created_at')
-      .single()
+      }),
+    })
 
-    if (error) {
-      setErrorMessage(error.message)
+    const result = (await response.json().catch(() => null)) as
+      | { bookmark?: Bookmark; error?: string }
+      | null
+    const createdBookmark = result?.bookmark
+
+    if (!response.ok || !createdBookmark) {
+      setErrorMessage(result?.error ?? 'Failed to add bookmark.')
       setIsSubmitting(false)
       return
     }
 
-    setBookmarks((current) => upsertBookmark(current, data as Bookmark))
+    setBookmarks((current) => upsertBookmark(current, createdBookmark))
     setTitle('')
     setUrl('')
     setIsSubmitting(false)
@@ -158,11 +163,15 @@ export function BookmarksDashboard({
     setErrorMessage(null)
     setDeletingId(id)
 
-    const supabase = createClient()
-    const { error } = await supabase.from('bookmarks').delete().eq('id', id)
+    const response = await fetch(`/api/bookmarks/${id}`, {
+      method: 'DELETE',
+    })
 
-    if (error) {
-      setErrorMessage(error.message)
+    if (!response.ok) {
+      const result = (await response.json().catch(() => null)) as
+        | { error?: string }
+        | null
+      setErrorMessage(result?.error ?? 'Failed to delete bookmark.')
       setDeletingId(null)
       return
     }

@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas   = ["public"]
+}
+
+model Profile {
+  id        String     @id @db.Uuid
+  email     String?    @db.Text
+  fullName  String?    @map("full_name") @db.Text
+  avatarUrl String?    @map("avatar_url") @db.Text
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  bookmarks Bookmark[]
+
+  @@map("profiles")
+  @@schema("public")
+}
+
+model Bookmark {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  title     String   @db.Text
+  url       String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  user      Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("bookmarks")
+  @@schema("public")
+}

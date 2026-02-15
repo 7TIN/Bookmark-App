@@ -2,7 +2,6 @@ import { BookmarksDashboard } from '@/components/bookmarks-dashboard'
 import { prisma } from '@/lib/prisma'
 import { syncProfileFromAuthUser } from '@/lib/server/profile'
 import { createServerSupabaseClient } from '@/lib/supabase/ssr-server'
-import { redirect } from 'next/navigation'
 
 type Bookmark = {
   id: string
@@ -18,36 +17,37 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect('/login')
-  }
+  const isAuthenticated = Boolean(user)
 
   let bookmarks: Bookmark[] = []
   let bookmarksError: string | null = null
 
-  try {
-    await syncProfileFromAuthUser(user)
+  if (user) {
+    try {
+      await syncProfileFromAuthUser(user)
 
-    const bookmarkRows = await prisma.bookmark.findMany({
-      where: { userId: user.id },
-      orderBy: { createdAt: 'desc' },
-    })
+      const bookmarkRows = await prisma.bookmark.findMany({
+        where: { userId: user.id },
+        orderBy: { createdAt: 'desc' },
+      })
 
-    bookmarks = bookmarkRows.map((bookmark) => ({
-      id: bookmark.id,
-      user_id: bookmark.userId,
-      title: bookmark.title,
-      url: bookmark.url,
-      created_at: bookmark.createdAt.toISOString(),
-    }))
-  } catch {
-    bookmarksError = 'Failed to load bookmarks.'
+      bookmarks = bookmarkRows.map((bookmark) => ({
+        id: bookmark.id,
+        user_id: bookmark.userId,
+        title: bookmark.title,
+        url: bookmark.url,
+        created_at: bookmark.createdAt.toISOString(),
+      }))
+    } catch {
+      bookmarksError = 'Failed to load bookmarks.'
+    }
   }
 
   return (
     <BookmarksDashboard
-      userId={user.id}
-      userEmail={user.email ?? ''}
+      mode={isAuthenticated ? 'authenticated' : 'guest'}
+      userId={user?.id}
+      userEmail={user?.email ?? ''}
       initialBookmarks={bookmarks}
       initialError={bookmarksError}
     />

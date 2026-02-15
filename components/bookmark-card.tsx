@@ -203,7 +203,6 @@ export function BookmarkCard({ bookmark, index, isDeleting, onDelete }: Bookmark
             Open
           </a>
           <button 
-          title='delete'
             type="button"
             onClick={() => onDelete(bookmark.id)}
             disabled={isDeleting}

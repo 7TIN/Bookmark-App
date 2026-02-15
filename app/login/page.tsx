@@ -1,6 +1,7 @@
 import { GoogleSignInButton } from '@/components/google-sign-in-button'
 import { createServerSupabaseClient } from '@/lib/supabase/ssr-server'
 import { Bookmark } from 'lucide-react'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 type LoginPageProps = {
@@ -41,6 +42,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </p>
           ) : null}
           <GoogleSignInButton />
+          <Link
+            href="/dashboard"
+            className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-md border border-border px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            Skip login and use local storage
+          </Link>
         </section>
 
         <p className="mt-6 text-center text-xs text-muted-foreground/60">

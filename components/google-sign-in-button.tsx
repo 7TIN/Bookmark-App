@@ -3,6 +3,8 @@
 import { createClient } from '@/lib/supabase/client'
 import { useState } from 'react'
 
+const ONBOARDING_STORAGE_KEY = 'bookmark-onboarding-complete'
+
 export function GoogleSignInButton() {
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -13,6 +15,7 @@ export function GoogleSignInButton() {
 
     const supabase = createClient()
     const redirectTo = `${window.location.origin}/auth/callback?next=/dashboard`
+    window.localStorage.setItem(ONBOARDING_STORAGE_KEY, '1')
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
